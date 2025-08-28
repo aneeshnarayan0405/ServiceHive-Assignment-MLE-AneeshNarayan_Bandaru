@@ -405,6 +405,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Google Colab for providing computational resources
 - Open-source community for invaluable tools and libraries
 
----
 
-For questions or support, please contact [Your Name] at [your.email@example.com]
+
