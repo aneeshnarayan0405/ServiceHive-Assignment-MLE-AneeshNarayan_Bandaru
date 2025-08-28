@@ -1,0 +1,12 @@
+services:
+  scene-analysis-api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - MODEL_PATH=models/transfer_model.h5
+    volumes:
+      - ./models:/app/models
+    restart: unless-stopped

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scene Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .upload-container { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 20px 0; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .hidden { display: none; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <h1>Scene Analysis System</h1>
+    <p>Upload an image to classify the scene and get a description</p>
+    
+    <div class="upload-container">
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="uploadImage()">Analyze Image</button>
+    </div>
+    
+    <div id="spinner" class="spinner hidden"></div>
+    
+    <div id="result" class="hidden">
+        <h2>Analysis Results</h2>
+        <div id="predictionResult"></div>
+    </div>
+    
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+            const predictionResult = document.getElementById('predictionResult');
+            const spinner = document.getElementById('spinner');
+            
+            if (!fileInput.files.length) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            // Show spinner, hide result
+            spinner.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display results
+                predictionResult.innerHTML = `
+                    <p><strong>Predicted Class:</strong> ${data.predicted_class}</p>
+                    <p><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</p>
+                    <p><strong>Uncertainty:</strong> ${(data.uncertainty * 100).toFixed(2)}%</p>
+                    <p><strong>Description:</strong> ${data.description}</p>
+                    <p><strong>Model:</strong> ${data.model_name}</p>
+                `;
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                alert('Error analyzing image: ' + error.message);
+                console.error('Error:', error);
+            } finally {
+                spinner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
